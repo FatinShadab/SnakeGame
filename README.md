@@ -33,7 +33,9 @@ Pygame শিক্ষার জন্য এখন আমরা প্রস্
 ---
 এখন আমরা জানি যে গেম আসলে কি। চলো আমরা একটা diagram দেখে আসি যেটা আমাদের গেম এর সংজ্ঞা কে সমর্থন করে -
 <br>
-<center><img src="images/gameLoop.jpg" hieght=60% width=60%></center>
+<div style="text-align: center;">
+    <img src="images/gameLoop.jpg" height="60%" width="60%">
+</div>
 <br>
 
 আমরা এখন পর্যন্ত যা আলোচনা করলাম তা এখানে অনেক সহজে দেখানো হয়েছে। এখন এই diagram নিয়ে কিছু আলোচনা করা যাক। কেননা যেকোনো গেম বানাতে আমাদের এই diagram টা implement করতে হবে, তারপর আমরা আমাদের গেম এর প্রয়োজন অনুযায়ী আরো অনেক features develop করবো।
@@ -56,3 +58,88 @@ Pygame শিক্ষার জন্য এখন আমরা প্রস্
 
 #### # চলো এবার সাপ বানাই। 	ᕙ(`▽´)ᕗ
 ---
+শুরুতেই বলে নেই এখানে গেমটার কোড OOP Approach এ করা হবে,কেননা এখন গেম ডেভেলপমেন্টে OOP Approach ব্যবহার করতে উৎসাহিত করা হয় এবং আমি নিজেও OOP Approach ব্যবহার করে থাকি।
+
+পুরো গেমটার কোড আমি কিছু ধাপে করে দেখাচ্ছি, যাতে তোমাদের অনুসরণ করতে সুবিধা হয় । 
+ধাপ গুলো হলো -
+
+- ১| Pygame দিয়ে সাধারণ একটা গ্যামেলুপ blank template তৈরি করা
+- ২| সাপের খাবার ইমপ্লিমেন্টেশন
+- ৩| সাপ/প্লেয়ার ক্যারেক্টার ইমপ্লিমেন্টেশন
+- ৪| সাপ এবং খাবার এর গেম লজিক ইমপ্লিমেন্টেশন 
+- ৫| গেম স্কোর ইমপ্লিমেন্টেশন 
+- ৬| গেম টারমিনেশন লজিক ইমপ্লিমেন্টেশন
+- ৭| গেমে Sound সংজোযন
+
+##### ১| Pygame দিয়ে সাধারণ একটা গ্যামেলুপ blank template তৈরি করা
+```
+# কোড করার জন্য প্রয়োজনীয় লাইব্রেরি গুলো ইম্পোর্ট করা হয়েছে
+import sys       # Code সফলভাবে বন্ধ করার জন্য লাগবে
+import time      # delta time নির্ণয়র জন্য কাজে লাগবে 
+import pygame    # pygame রেফারেন্স api
+
+
+class Game:
+    def __init__(self):
+        # গেম ক্লাসের ইনিসিয়েলাইজেশন ফাংশন, যেখানে গেমের attributes সেট করা হচ্ছে
+        self.runFlag = True
+        self.window = pygame.display.set_mode((1280, 720))
+        self.gameClock = pygame.time.Clock()
+        self.maxFPS = 60
+        self.backgroundColor = (173, 204, 96)
+        self.window.fill(self.backgroundColor)
+        pygame.display.set_caption("PySnake")   
+
+    def render(self):    
+        # গেমের রেন্ডারিং ফাংশন
+        pygame.display.update()
+
+    def input(self):
+        # ব্যবহারকারীর ইনপুট নেওয়ার ফাংশন
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.runFlag = False
+
+    def update(self, deltaTime):
+        # গেম আপডেট ফাংশন (খালি, কারণ এখনই কোনও গেম লজিক নেই)
+        pass
+
+    def cleanup(self):
+        # এই ফাংশনে সফলভাবে এবং সঠিকভাবে প্রোগ্রাম বন্ধ করার লজিক ইম্পলিমেন্ট করা হয়েছে
+        pygame.quit()
+        sys.exit()
+
+    def gameLoop(self):        
+        # গেম লুপের ফাংশন, যেখানে গেম লুপ চালানো হচ্ছে
+        lastTime = time.time()
+        
+        while self.runFlag:
+            deltaTime = time.time() - lastTime
+            lastTime = time.time()
+
+            self.input()
+            self.update(deltaTime)
+            self.render()
+
+            self.gameClock.tick(self.maxFPS)
+
+    def run(self):
+        self.gameLoop()
+
+if __name__ == "__main__":
+    # গেম ক্লাস ইনিশিয়ালাইজ করে এবং run ফাংশন চালায়
+    Game().run()
+```
+কোডটি run করলে নিচের ছবিরমতো একটি window  খুলবে, window এর ধরণ OS ভেদে চিনো হতে পারে।
+<br>
+<div style="text-align: center;">
+    <img src="images/ss1.png" height="60%" width="60%">
+</div>
+<br>
+
+##### ২| সাপের খাবার ইমপ্লিমেন্টেশন
+##### ৩| সাপ/প্লেয়ার ক্যারেক্টার ইমপ্লিমেন্টেশন
+##### ৪| সাপ এবং খাবার এর গেম লজিক ইমপ্লিমেন্টেশন 
+##### ৫| গেম স্কোর ইমপ্লিমেন্টেশন 
+##### ৬| গেম টারমিনেশন লজিক ইমপ্লিমেন্টেশন
+##### ৭| গেমে Sound সংজোযন
