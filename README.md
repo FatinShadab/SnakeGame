@@ -206,7 +206,72 @@ class Game:
 <br>
 
 ##### ৩| সাপ/প্লেয়ার ক্যারেক্টার ইমপ্লিমেন্টেশন
-##### ৪| সাপ এবং খাবার এর গেম লজিক ইমপ্লিমেন্টেশন 
-##### ৫| গেম স্কোর ইমপ্লিমেন্টেশন 
-##### ৬| গেম টারমিনেশন লজিক ইমপ্লিমেন্টেশন
-##### ৭| গেমে Sound সংযোজন 
+```
+# Snake ক্লাসে Snake-এর একটি basic setup করা হচ্ছে
+
+class Snake:
+    # স্নেকের রঙ স্থাপন করা হচ্ছে (Class variable)
+    COLOR = (40, 55, 20)
+    
+    def __init__(self, cellWH):
+        # স্নেকের body-এর dimensions দেওয়া হচ্ছে
+        self.w, self.h = self.bodyWH = cellWH
+        
+        # স্নেকের body তৈরি করা হচ্ছে যা হলো list of vectors
+        self.body = [
+            pygame.math.Vector2(6, 9),
+            pygame.math.Vector2(5, 9),
+            pygame.math.Vector2(4, 9)
+        ]
+        
+        # স্নেকের মুখটি স্থাপন করা হচ্ছে
+        # Setting up the snake's head
+        self.head = self.body[0]
+
+    def get_render_object(self):
+        # রেন্ডার অবজেক্ট প্রদান করা হচ্ছে, যেখানে স্নেকের প্রতিটি খন্ডের স্থান এবং আয়তন প্রদান করা হচ্ছে
+        return [(block.x * self.w, block.y * self.h, *self.bodyWH) for block in self.body]
+```
+```
+...
+
+class Game:
+    def __init__(self):
+        self.cellCount = 20
+        self.cellSize = 50
+        self.windowWH = (
+            self.cellCount * self.cellSize,
+            self.cellCount * self.cellSize
+        )
+        ...
+        ...
+        
+        # Snake class এর একটি object তৈরি করা হলো। যেটা আমাদের গেমের playable charecter। 
+        self.snake = Snake((self.cellSize, self.cellSize))
+        
+        ...
+
+    def render(self):
+        # 
+        for renderObj in self.snake.get_render_object():
+            pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 8)
+    ...
+    ...
+
+    def run(self):
+        self.gameLoop()
+
+...
+```
+চলো দেখি আমাদের সাপটা দেখতে কেমন। 
+<br>
+<div style="text-align: center;">
+    <img src="images/ss3.png" height="60%" width="60%">
+</div>
+<br>
+
+##### ৪| সাপের চলাচল ইমপ্লিমেন্টেশন
+##### ৫| সাপ এবং খাবার এর গেম লজিক ইমপ্লিমেন্টেশন 
+##### ৬| গেম স্কোর ইমপ্লিমেন্টেশন 
+##### ৭| গেম টারমিনেশন লজিক ইমপ্লিমেন্টেশন
+##### ৮| গেমে Sound সংযোজন 
