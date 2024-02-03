@@ -8,10 +8,11 @@ class Food:
     def __init__(self, scaledWH = None):
         self.image = pygame.image.load("resources/egg.png").convert_alpha()
         
-        self.image = pygame.transform.scale(
-            self.image, 
-            scaledWH
-        )
+        if scaledWH:
+            self.image = pygame.transform.scale(
+                self.image, 
+                scaledWH
+            )
         
     def get_render_object(self):
         return self.image
@@ -20,6 +21,24 @@ class Food:
         x = random.randint(*xRange)
         y = random.randint(*yRange)
         return self.image.get_rect(topleft=(x, y))
+
+
+class Snake:
+    COLOR = (40, 55, 20)
+    
+    def __init__(self, cellWH):
+        self.w, self.h = self.bodyWH = cellWH
+        
+        self.body = [
+            pygame.math.Vector2(6, 9),
+            pygame.math.Vector2(5, 9),
+            pygame.math.Vector2(4, 9)
+        ]
+        
+        self.head = self.body[0]
+
+    def get_render_object(self):
+        return [(block.x * self.w, block.y * self.h, *self.bodyWH) for block in self.body]
 
 
 class Game:
@@ -40,7 +59,9 @@ class Game:
         pygame.display.set_caption("PySnake") 
         
         
-        food = Food((self.cellSize, self.cellSize))
+        self.snake = Snake((self.cellSize, self.cellSize))
+        
+        food = Food((self.cellSize + 20, self.cellSize + 20))
         self.window.blit(
             food.get_render_object(),
             food.get_random_render_pos(
@@ -50,7 +71,8 @@ class Game:
             )  
 
     def render(self):
-        pass
+        for renderObj in self.snake.get_render_object():
+            pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 8)
 
     def input(self):
         for event in pygame.event.get():
@@ -64,7 +86,7 @@ class Game:
         pygame.quit()
         sys.exit()
 
-    def gameLoop(self):        
+    def gameLoop(self):
         lastTime = time.time()
         
         while self.runFlag:
