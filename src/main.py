@@ -66,7 +66,7 @@ class Game:
     
     def __init__(self):
         pygame.init()
-        self.cellCount = 20
+        self.cellCount = 16
         self.cellSize = 50
         self.windowWH = (
             self.cellCount * self.cellSize,
@@ -91,7 +91,7 @@ class Game:
         self.recordedUserEvent = None
         
         pygame.time.set_timer(Game.AUTO_SNAKE_MOVEMENT, 200)
-        pygame.time.set_timer(Game.AUTO_FOOD_GENERATION, 4000)
+        pygame.time.set_timer(Game.AUTO_FOOD_GENERATION, 5000)
 
     def handle_food_snake_collision(self):
         if self.snake.get_snake_head().colliderect(self.foodPos):
