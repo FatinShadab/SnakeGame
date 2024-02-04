@@ -60,12 +60,14 @@ class Snake:
     def grow(self):
         self.body.append(self.body[-1] + self.direction)
 
+
 class Game:
     AUTO_SNAKE_MOVEMENT = pygame.event.custom_type()
     AUTO_FOOD_GENERATION = pygame.event.custom_type()
     
     def __init__(self):
         pygame.init()
+        self.scoreValue = 0
         self.cellCount = 16
         self.cellSize = 50
         self.windowWH = (
@@ -76,13 +78,14 @@ class Game:
         self.runFlag = True
         self.window = pygame.display.set_mode(self.windowWH)
         self.gameClock = pygame.time.Clock()
+        self.font = pygame.font.Font("resources/Pixeltype.ttf", 60)
         self.maxFPS = 60
         self.backgroundColor = (173, 204, 96)
         pygame.display.set_caption("PySnake")
         
-        self.snake = Snake((self.cellSize, self.cellSize))
+        self.snake = Snake((self.cellSize + 10, self.cellSize + 10))
         
-        self.food = Food((self.cellSize + 10, self.cellSize + 10))
+        self.food = Food((2*self.cellSize, 2*self.cellSize))
         self.foodPos = self.foodPos = self.food.get_random_render_pos(
             (50,  (self.cellCount - 2) * self.cellSize),
             (50,  (self.cellCount - 2) * self.cellSize)
@@ -100,11 +103,12 @@ class Game:
                 (50,  (self.cellCount - 2) * self.cellSize)
             )
             self.snake.grow()
-        
-        pass
+            self.scoreValue += 1
 
     def render(self):
         self.window.fill(self.backgroundColor)
+        
+        self.window.blit(self.font.render(f"Score {self.scoreValue}", False, "White"), (5, 5))
         
         self.window.blit(
             self.food.get_render_object(),
