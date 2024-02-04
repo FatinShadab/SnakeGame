@@ -1,7 +1,13 @@
 import sys
-import time
 import random
 import pygame
+
+
+class Direction:
+    RIGHT = pygame.math.Vector2(1, 0)
+    LEFT = pygame.math.Vector2(-1, 0)
+    UP = pygame.math.Vector2(0, -1)
+    DOWN = pygame.math.Vector2(0, 1)
 
 
 class Food:
@@ -20,6 +26,7 @@ class Food:
     def get_random_render_pos(self, xRange, yRange):
         x = random.randint(*xRange)
         y = random.randint(*yRange)
+        
         return self.image.get_rect(topleft=(x, y))
 
 
@@ -27,7 +34,9 @@ class Snake:
     COLOR = (40, 55, 20)
     
     def __init__(self, cellWH):
+        self.defaultDirection = Direction.RIGHT
         self.w, self.h = self.bodyWH = cellWH
+        self.direction = self.defaultDirection
         
         self.body = [
             pygame.math.Vector2(6, 9),
@@ -36,13 +45,23 @@ class Snake:
         ]
         
         self.head = self.body[0]
+        
+    def update(self):
+        self.body.pop()
+        self.body.insert(0, self.head + self.direction)
+        self.head = self.body[0]
+        
 
     def get_render_object(self):
         return [(block.x * self.w, block.y * self.h, *self.bodyWH) for block in self.body]
 
 
 class Game:
+    AUTO_SNAKE_MOVEMENT = pygame.event.custom_type()
+    AUTO_FOOD_GENERATION = pygame.event.custom_type()
+    
     def __init__(self):
+        pygame.init()
         self.cellCount = 20
         self.cellSize = 50
         self.windowWH = (
@@ -55,31 +74,67 @@ class Game:
         self.gameClock = pygame.time.Clock()
         self.maxFPS = 60
         self.backgroundColor = (173, 204, 96)
-        self.window.fill(self.backgroundColor)
-        pygame.display.set_caption("PySnake") 
-        
+        pygame.display.set_caption("PySnake")
         
         self.snake = Snake((self.cellSize, self.cellSize))
         
-        food = Food((self.cellSize + 20, self.cellSize + 20))
-        self.window.blit(
-            food.get_render_object(),
-            food.get_random_render_pos(
-                (0,  (self.cellCount - 1) * self.cellSize),
-                (0,  (self.cellCount - 1) * self.cellSize)
-                )
-            )  
+        self.food = Food((self.cellSize + 10, self.cellSize + 10))
+        self.foodPos = self.foodPos = self.food.get_random_render_pos(
+            (50,  (self.cellCount - 2) * self.cellSize),
+            (50,  (self.cellCount - 2) * self.cellSize)
+        )
+        
+        self.recordedUserEvent = None
+        
+        pygame.time.set_timer(Game.AUTO_SNAKE_MOVEMENT, 200)
+        pygame.time.set_timer(Game.AUTO_FOOD_GENERATION, 4000)
 
     def render(self):
-        for renderObj in self.snake.get_render_object():
-            pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 8)
+        self.window.fill(self.backgroundColor)
+        
+        self.window.blit(
+            self.food.get_render_object(),
+            self.foodPos
+        )
+        
+        for idx, renderObj in enumerate(self.snake.get_render_object()):
+            if idx == 0:
+                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 16)
+            else:
+                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 8)
 
     def input(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.runFlag = False
+                
+            self.recordedUserEvent = event
 
-    def update(self, deltaTime):
+    def update(self):
+        if self.recordedUserEvent:
+            if self.recordedUserEvent.type == Game.AUTO_SNAKE_MOVEMENT:
+                self.snake.update()
+            
+            if self.recordedUserEvent.type == Game.AUTO_FOOD_GENERATION:
+                print(pygame.time.get_ticks())
+                self.foodPos = self.food.get_random_render_pos(
+                    (50,  (self.cellCount - 2) * self.cellSize),
+                    (50,  (self.cellCount - 2) * self.cellSize)
+                )
+                
+            if self.recordedUserEvent.type == pygame.KEYDOWN:
+                if self.recordedUserEvent.key == pygame.K_UP:
+                    self.snake.direction = Direction.UP
+                elif self.recordedUserEvent.key == pygame.K_DOWN:
+                    self.snake.direction = Direction.DOWN
+                elif self.recordedUserEvent.key == pygame.K_RIGHT:
+                    self.snake.direction = Direction.RIGHT
+                elif self.recordedUserEvent.key == pygame.K_LEFT:
+                    self.snake.direction = Direction.LEFT
+            
+            self.recordedUserEvent = None
+
+        pygame.display.flip()
         pygame.display.update()
 
     def cleanup(self):
@@ -87,14 +142,10 @@ class Game:
         sys.exit()
 
     def gameLoop(self):
-        lastTime = time.time()
-        
         while self.runFlag:
-            deltaTime = time.time() - lastTime
-            lastTime = time.time()
-
+            
             self.input()
-            self.update(deltaTime)
+            self.update()
             self.render()
 
             self.gameClock.tick(self.maxFPS)
