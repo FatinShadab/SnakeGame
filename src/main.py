@@ -63,7 +63,7 @@ class Snake:
 
 class Game:
     AUTO_SNAKE_MOVEMENT = pygame.event.custom_type()
-    AUTO_FOOD_GENERATION = pygame.event.custom_type()
+    #AUTO_FOOD_GENERATION = pygame.event.custom_type()
     
     def __init__(self):
         pygame.init()
@@ -94,10 +94,18 @@ class Game:
         self.recordedUserEvent = None
         
         pygame.time.set_timer(Game.AUTO_SNAKE_MOVEMENT, 200)
-        pygame.time.set_timer(Game.AUTO_FOOD_GENERATION, 5000)
+        #pygame.time.set_timer(Game.AUTO_FOOD_GENERATION, 5000)
 
     def handle_food_snake_collision(self):
-        if self.snake.get_snake_head().colliderect(self.foodPos):
+        food_solid_area = self.foodPos.copy()
+        food_solid_area.width = 35
+        food_solid_area.height = 40
+        food_solid_area.x += 35
+        food_solid_area.y += 25
+
+        #pygame.draw.rect(self.window, "Blue", food_solid_area)
+
+        if self.snake.get_snake_head().colliderect(food_solid_area):
             self.foodPos = self.foodPos = self.food.get_random_render_pos(
                 (50,  (self.cellCount - 2) * self.cellSize),
                 (50,  (self.cellCount - 2) * self.cellSize)
@@ -133,11 +141,11 @@ class Game:
             if self.recordedUserEvent.type == Game.AUTO_SNAKE_MOVEMENT:
                 self.snake.update()
             
-            if self.recordedUserEvent.type == Game.AUTO_FOOD_GENERATION:
-                self.foodPos = self.food.get_random_render_pos(
-                    (50,  (self.cellCount - 2) * self.cellSize),
-                    (50,  (self.cellCount - 2) * self.cellSize)
-                )
+            # if self.recordedUserEvent.type == Game.AUTO_FOOD_GENERATION:
+            #     self.foodPos = self.food.get_random_render_pos(
+            #         (50,  (self.cellCount - 2) * self.cellSize),
+            #         (50,  (self.cellCount - 2) * self.cellSize)
+            #     )
                 
             if self.recordedUserEvent.type == pygame.KEYDOWN:
                 if self.recordedUserEvent.key == pygame.K_UP:
