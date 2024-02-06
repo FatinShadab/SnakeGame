@@ -74,7 +74,7 @@ Rectangle collision system হলো সবচেয়ে সহজ collision syst
 
 <br>
 <div style="text-align: center;">
-    <img src="images/yAxis.png" height="60%" width="60%">
+    <img src="images/collision.png" height="60%" width="60%">
 </div>
 <br>
 
