@@ -376,9 +376,10 @@ class Game:
 
             self.render()
 
-            self.gameClock.tick(self.maxFPS)
             pygame.display.flip()
             pygame.display.update()
+            
+            self.gameClock.tick(self.maxFPS)
 
     def run(self) -> None:
         """
