@@ -1,4 +1,4 @@
-# PygameBasics
+# Basics of Game and Pygame
 ---
 তোমরা এখানে! আরে আরে কোথায় যাও! এসে যখন পড়েছো, Game development এবং Pygame সম্পর্কে কিছু শিখে যাও। 
 
