@@ -4,7 +4,7 @@
 
 #### # Pygame আবার কোন গেম? (◔_◔)
 ---
-ধুরো! Pygame কোনো game না। ইহা Python এর একটি library যা দিয়ে আমরা গেম বানাতে পারি। আমি ধরে নিচ্ছি যে তোমরা সবাই Python এবং Python এর basic জানো। আমরা আজকে python এবং programming এর basic নিয়ে তেমন কিছু আলোচনা করবো না। 
+ধুরো! Pygame কোনো game না। ইহা Python এর একটি library যা দিয়ে আমরা গেম বানাতে পারি। আমি ধরে নিচ্ছি যে তোমরা সবাই Python এবং Python, OOP এর basics জানো। আমরা আজকে python এবং Object-oriented programming এর basics নিয়ে তেমন কিছু আলোচনা করবো না। 
 
 শিখার যাত্রাটা Pygame install করার মাধ্যমে শুরু করলে খারাপ হয় না। Pygame install এর জন্য আমাদের কম্পিউটারে Python থাকতে হবে। যদি Python না থাকে তাহলে [python.org](https://www.python.org/downloads) থেকে stable version ডাউনলোড করে নিতে পারো। 
 
