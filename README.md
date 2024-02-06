@@ -78,6 +78,9 @@ Rectangle collision system হলো সবচেয়ে সহজ collision syst
 </div>
 <br>
 
+##### Grid system
+একটি গ্রিড সিস্টেম হলো একটি দ্বি-মাত্রিক স্থানের মধ্যে গেমের উপাদান(objects), গ্রাফিক্স বা গেমপ্লেকে সংগঠিত এবং গঠন করার একটি উপায়। গ্রিডের প্রতিটি কক্ষ একটি নির্দিষ্ট অবস্থানের প্রতিনিধিত্ব করে এবং সামগ্রিক কাঠামো গেম লজিক, সংঘর্ষ সনাক্তকরণ এবং বস্তুর স্থান নির্ধারণকে সহজ করে তোলে। গ্রিড সিস্টেমগুলি সাধারণত 2D গেমগুলিতে পরিবেশ, স্তর তৈরি করতে এবং গেম entity পরিচালনা করতে ব্যবহার করা হয়।
+
 ##### Computer Graphics System
 বলাই বাহুল্য যে কম্পিউটার গ্রাফিক্সে (x, y) এর মান একটু ভিন্নভাবে কাজ করে। সাধারণত (0, 0) বিন্দুর অবস্থান মাঝখানে থাকার কথা।  তবে কম্পিউটার গ্রাফিক্সে (0, 0) বিন্দু top-left corner এ থাকে। ঠিক আছে বুঝলাম! আরে দাড়াও, এখনো শেষ হয় নি! মজার কথাতো বাকি আছে এখনও। কম্পিউটার গ্রাফিক্সে y এর মান উল্টাভাবে কাজ করে।
 
@@ -88,14 +91,15 @@ Rectangle collision system হলো সবচেয়ে সহজ collision syst
 </div>
 <br>
 
-##### Self Explanatory Source Code
+##### *** তোমরা ইচ্ছে করলে snake গেমের source code-টি নিচের link থেকে দেখে নিতে পারো। 
+##### --> [Self Explanatory Source Code](https://github.com/FatinShadab/PygameBasics/blob/main/src/main.py)
+
+ভয় পেলে নাকি? আরেহ ভয়ের কিছু নেই, আসো, কিছু ধাপে code-টি বিশ্লেষণ করা যাক -
+
+##### Direction Class:
+ভিক্টর দিয়ে বিভিন্ন দিক represent করে (RIGHT, LEFT, UP, DOWN)।
+স্নেকের চলনার জন্য ব্যবহৃত হয়।
 ```
-import sys
-import random
-from typing import Optional, List, Tuple
-import pygame
-
-
 class Direction:
     """
     Used for representing different directions.
@@ -104,8 +108,11 @@ class Direction:
     LEFT: pygame.math.Vector2 = pygame.math.Vector2(-1, 0)
     UP: pygame.math.Vector2 = pygame.math.Vector2(0, -1)
     DOWN: pygame.math.Vector2 = pygame.math.Vector2(0, 1)
+```
 
-
+##### Food Class:
+গেমে Food object-এর গেমে লজিক এবং রেন্ডার এর কাজ গুলো করার জন্য লেখা হয়েছে। 
+```
 class Food:
     """
     Represents the food object in the game.
@@ -117,13 +124,6 @@ class Food:
         Parameters:
             scaledWH (tuple): Tuple specifying the scaled width and height of the food image.
         """
-        self.image: pygame.Surface = pygame.image.load("resources/egg.png").convert_alpha()
-
-        if scaledWH:
-            self.image = pygame.transform.scale(
-                self.image,
-                scaledWH
-            )
 
     def get_render_object(self) -> pygame.Surface:
         """
@@ -132,7 +132,6 @@ class Food:
         Returns:
             pygame.Surface: The rendered image of the food.
         """
-        return self.image
 
     def get_random_render_pos(self, xRange: Tuple[int, int], yRange: Tuple[int, int]) -> pygame.Rect:
         """
@@ -145,12 +144,17 @@ class Food:
         Returns:
             pygame.Rect: Rectangle representing the random position for rendering the food.
         """
-        x: int = random.randint(*xRange)
-        y: int = random.randint(*yRange)
+```
 
-        return self.image.get_rect(topleft=(x, y))
-
-
+##### Snake Class:
+গেমে snake-এর game logic, যেমন movement, growth, body এবং render object related কোড করা হয়েছে।
+- মেথডস:
+    - update(): sanke-এর দিক ভিত্তিক অবস্থান আপডেট করে।
+    - get_render_object(): sanke-এর body (values to draw rectangles) return করে।
+    - get_snake_head(): sanke-এর head (values to draw rectangles) return করে।
+    - grow(): sanke-এর দৈর্ঘ্য বাড়াতে একটি শরীর(Rectangle) অংশ যোগ করে।
+    - reset(): sanke-টি তার ডিফল্ট অবস্থায় রিসেট করে।
+```
 class Snake:
     """
     Represents the snake object in the game.
@@ -164,26 +168,11 @@ class Snake:
         Parameters:
             cellWH (tuple): Tuple specifying the width and height of each cell in the snake.
         """
-        self.defaultDirection: pygame.math.Vector2 = Direction.RIGHT
-        self.w, self.h = self.bodyWH = cellWH
-        self.direction: pygame.math.Vector2 = self.defaultDirection
-
-        # Initial body parts of the snake
-        self.body: List[pygame.math.Vector2] = [
-            pygame.math.Vector2(6, 9),
-            pygame.math.Vector2(5, 9),
-            pygame.math.Vector2(4, 9)
-        ]
-
-        self.head: pygame.math.Vector2 = self.body[0]
 
     def update(self) -> None:
         """
         Update the position of the snake based on its direction.
         """
-        self.body.pop()
-        self.body.insert(0, self.head + self.direction)
-        self.head = self.body[0]
 
     def get_render_object(self) -> List[Tuple[int, int, int, int]]:
         """
@@ -192,7 +181,6 @@ class Snake:
         Returns:
             list: List of tuples, where each tuple represents the (x, y, width, height) of a body part.
         """
-        return [(block.x * self.w, block.y * self.h, *self.bodyWH) for block in self.body]
 
     def get_snake_head(self) -> pygame.Rect:
         """
@@ -201,13 +189,11 @@ class Snake:
         Returns:
             pygame.Rect: Rectangle representing the head of the snake.
         """
-        return pygame.Rect(self.head.x * self.w, self.head.y * self.h, *self.bodyWH)
 
     def grow(self) -> None:
         """
         Increase the length of the snake by adding a body part.
         """
-        self.body.append(self.body[-1] + self.direction)
 
     def reset(self) -> None:
         """
@@ -216,272 +202,162 @@ class Snake:
         self.direction = self.defaultDirection
 
         # Initial body parts of the snake
-        self.body = [
-            pygame.math.Vector2(6, 9),
-            pygame.math.Vector2(5, 9),
-            pygame.math.Vector2(4, 9)
-        ]
+```
 
-        self.head = self.body[0]
+##### Game Class:
+Game World, Rendering, Input এবং Update সম্পর্কিত কাজ করে।
+- মেথডস:
+    - config_audio(): গেম Sound লোড এবং কনফিগার করে।
+    - update_high_score(): বর্তমান স্কোরের উপরে হাই স্কোর আপডেট করে।
+    - handle_food_snake_collision(): Snake এবং Food মধ্যে collision, score আপডেট এবং sound নিয়ন্ত্রণ করে।
+    - termination_event_ocurred(): গেম সমাপ্তির শর্ত চেক করে।
+    - render_menu(): মেনু স্ক্রিন রেন্ডার করে।
+    - render(): গেম রেন্ডার করে, প্লে এরিয়া, score, snake, food এবং menu / pause screen সহ।
+    - input(): user input নিয়ন্ত্রণ করে, যাতে খেলা শুরু হয়, এটি বিরত হয় এবং sanke-এর দিক পরিবর্তন হয়।
+    - update(): game world আপডেট করে, game logic নিয়ন্ত্রণ করে।
+    - cleanup(): ram পরিষ্কার করে এবং গেম থেকে বাহির হয়।
+    - gameLoop(): GameLoop-এর ইমপ্লিমেন্টেশন।
+    - run(): গেম শুরু করে।
 
-
+##### *** তোমাদের সুবিধার্তে পুরো __ এর মধ্যে থেকে __ এর ইম্প্লিমেন্টেশনটা আবার দেখছি,
+##### # Game loop implementation
+```
+# Game loop implementation
 class Game:
-    """
-    Represents the main game class.
-    """
-    Menu: int = 0
-    Play: int = 2
-    Pause: int = 3
+    # ... (constants and methods)
 
-    AUTO_SNAKE_MOVEMENT: int = pygame.event.custom_type()
-    AUTO_HISS_SOUND: int = pygame.event.custom_type()
-
-    def __init__(self) -> None:
-        """
-        Initialize the Game object.
-        """
+    def __init__(self):
         pygame.init()
+        # ... (initialize game properties)
 
-        # Game state and properties
-        self.state: int = Game.Menu
-        self.scoreValue: int = 0
-        self.highScoreValue: int = 0
-        self.cellCount: int = 16
-        self.cellSize: int = 50
-        self.windowWH: Tuple[int, int] = (
-            self.cellCount * self.cellSize,
-            self.cellCount * self.cellSize
-        )
-        self.width, self.height = self.windowWH
-        self.runFlag: bool = True
-        self.window: pygame.Surface = pygame.display.set_mode(self.windowWH)
-        self.gameClock: pygame.time.Clock = pygame.time.Clock()
-        self.font: pygame.font.Font = pygame.font.Font("resources/Pixeltype.ttf", 50)
-        self.font.bold: bool = True
-        self.maxFPS: int = 60
-        self.backgroundColor: Tuple[int, int, int] = (173, 204, 96)
-        pygame.display.set_caption("PySnake")
-
-        # Snake and Food objects
-        self.snake: Snake = Snake((self.cellSize + 10, self.cellSize + 10))
-        self.food: Food = Food((2 * self.cellSize, 2 * self.cellSize))
-        self.foodPos: Optional[pygame.Rect] = None
-
-        # Play area rectangle
-        self.playArea: pygame.Rect = pygame.Rect(5, 40, self.width - 10, self.height - 45)
-
-        # Timer events for automatic snake movement and hiss sound
-        pygame.time.set_timer(Game.AUTO_SNAKE_MOVEMENT, 200)
-        pygame.time.set_timer(Game.AUTO_HISS_SOUND, 5000)
-
-        # Configure audio
-        self.config_audio()
-
-    def config_audio(self) -> None:
-        """
-        Load and configure game sounds.
-        """
-        self.eatSE: pygame.mixer.Sound = pygame.mixer.Sound("resources/hiss3-103123.mp3")
-        self.hitSE: pygame.mixer.Sound = pygame.mixer.Sound("resources/loss.mp3")
-        self.hissSE: pygame.mixer.Sound = pygame.mixer.Sound("resources/hiss.mp3")
-
-        # Set volume for each sound
-        self.eatSE.set_volume(0.5)
-        self.hitSE.set_volume(0.5)
-        self.hissSE.set_volume(0.5)
-
-    def update_high_sore(self) -> None:
-        """
-        Update the high score based on the current score.
-        """
-        self.highScoreValue: int = max(self.highScoreValue, self.scoreValue)
-
-    def handle_food_snake_collision(self) -> None:
-        """
-        Handle collisions between snake and food, update score, and play sound.
-        """
-        food_solid_area: pygame.Rect = self.foodPos.copy()
-        food_solid_area.width = 40
-        food_solid_area.height = 40
-        food_solid_area.x += 35
-        food_solid_area.y += 25
-
-        if self.snake.get_snake_head().colliderect(food_solid_area):
-            # Generate new food position
-            self.foodPos: Optional[pygame.Rect] = self.food.get_random_render_pos(
-                (50, (self.cellCount - 2) * self.cellSize),
-                (50, (self.cellCount - 2) * self.cellSize)
-            )
-            # Grow the snake, update score, and play eat sound
-            self.snake.grow()
-            self.scoreValue += 1
-            self.eatSE.play()
-
-    def termination_event_ocurred(self) -> bool:
-        """
-        Check for game termination conditions.
-
-        Returns:
-            bool: True if the termination conditions are met, False otherwise.
-        """
-        snakeHead: pygame.Rect = self.snake.get_snake_head()
-        for bodyPart in self.snake.get_render_object()[1:]:
-            if snakeHead.contains(bodyPart):
-                return True
-        return not self.playArea.contains(snakeHead)
-
-    def render_menu(self) -> None:
-        """
-        Render the menu screen.
-        """
-        pygame.draw.circle(self.window, "Black", (self.width // 2, self.height // 2), self.width // 2.4)
-        pygame.draw.circle(self.window, (30, 60, 30), (self.width // 2, self.height // 2), self.width // 2.5)
-
-        if self.termination_event_ocurred():
-            # If game over, display score and high score
-            self.window.blit(self.font.render(f"Score : {self.scoreValue}", False, (6, 2, 26)),
-                             ((self.width // 4) + 120, self.height // 2.6))
-            self.window.blit(self.font.render(f"High Score : {self.highScoreValue}", False, (6, 2, 26)),
-                             ((self.width // 4) + 100, self.height // 2.2))
-            self.window.blit(self.font.render(f"Press Enter To Play !", False, (6, 2, 26)),
-                             ((self.width // 4) + 50, self.height // 1.8))
-        else:
-            # If not game over, display instructions
-            self.window.blit(self.font.render(f"Use Arrow keys to Move !", False, (6, 2, 26)),
-                             ((self.width // 5) + 70, self.height // 2.6))
-            self.window.blit(self.font.render(f"Space key to Pause !", False, (6, 2, 26)),
-                             ((self.width // 4) + 60, self.height // 2.2))
-            self.window.blit(self.font.render(f"Press Enter To Play !", False, (6, 2, 26)),
-                             ((self.width // 4) + 55, self.height // 1.8))
-
-    def render(self) -> None:
-        """
-        Render the game.
-        """
-        self.window.fill(self.backgroundColor)
-
-        # Draw play area rectangle
-        pygame.draw.rect(self.window, (6, 2, 26), self.playArea, 15)
-
-        # Display scores
-        self.window.blit(self.font.render(f"Score {self.scoreValue}", False, (6, 2, 26)), (10, 5))
-        self.window.blit(self.font.render(f"High Score : {self.highScoreValue}", False, (6, 2, 26)),
-                         ((self.width - 400) + 100, 5))
-
-        if self.foodPos:
-            # Display food at its position
-            self.window.blit(
-                self.food.get_render_object(),
-                self.foodPos
-            )
-
-        for idx, renderObj in enumerate(self.snake.get_render_object()):
-            if idx == 0:
-                # Draw head of the snake with larger border
-                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 26)
-            else:
-                # Draw body parts of the snake with smaller border
-                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 16)
-
-        if self.state == Game.Menu:
-            # Render menu screen if the game is in menu state
-            self.render_menu()
-
-        if self.state == Game.Pause:
-            # Draw pause indicator if the game is in pause state
-            pygame.draw.rect(self.window, Snake.COLOR, pygame.Rect(200, 5, 10, 20))
-            pygame.draw.rect(self.window, Snake.COLOR, pygame.Rect(215, 5, 10, 20))
-
-    def input(self) -> None:
-        """
-        Handle user input.
-        """
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.runFlag = False
-
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN and self.state == Game.Menu:
-                    # Start the game when Enter is pressed in the menu state
-                    self.scoreValue = 0
-                    self.snake.reset()
-                    self.foodPos: Optional[pygame.Rect] = self.food.get_random_render_pos(
-                        (50, (self.cellCount - 2) * self.cellSize),
-                        (50, (self.cellCount - 2) * self.cellSize)
-                    )
-                    self.state = Game.Play
-
-                if event.key == pygame.K_SPACE:
-                    # Toggle pause state with Space key
-                    if self.state == Game.Play:
-                        self.state = Game.Pause
-                    elif self.state == Game.Pause:
-                        self.state = Game.Play
-                elif event.key == pygame.K_UP:
-                    # Change snake direction based on arrow keys
-                    self.snake.direction = Direction.UP
-                elif event.key == pygame.K_DOWN:
-                    self.snake.direction = Direction.DOWN
-                elif event.key == pygame.K_RIGHT:
-                    self.snake.direction = Direction.RIGHT
-                elif event.key == pygame.K_LEFT:
-                    self.snake.direction = Direction.LEFT
-
-            elif event.type == Game.AUTO_SNAKE_MOVEMENT:
-                # Automatically update snake position at regular intervals
-                if self.state == Game.Play:
-                    self.snake.update()
-
-            elif event.type == Game.AUTO_HISS_SOUND:
-                # Play hiss sound at regular intervals
-                if self.state == Game.Play:
-                    self.hissSE.play()
-
-    def update(self) -> None:
-        """
-        Update the game state.
-        """
-        self.update_high_sore()
-        self.handle_food_snake_collision()
-
-        if self.termination_event_ocurred():
-            # Play hit sound and reset to menu state if termination conditions are met
-            self.hitSE.play()
-            self.state = Game.Menu
-
-    def cleanup(self) -> None:
-        """
-        Clean up resources and exit the game.
-        """
-        pygame.quit()
-        sys.exit()
-
-    def gameLoop(self) -> None:
-        """
-        Main game loop.
-        """
+    def gameLoop(self):
         while self.runFlag:
             self.input()
-
             if self.state == Game.Play:
                 self.update()
-
             self.render()
 
-            self.gameClock.tick(self.maxFPS)
             pygame.display.flip()
             pygame.display.update()
 
-    def run(self) -> None:
-        """
-        Start the game.
-        """
-        self.gameLoop()
-
-
-if __name__ == "__main__":
-    # Run the game when the script is executed
-    Game().run()
-
+            self.gameClock.tick(self.maxFPS)
 ```
-ভয় পেলে নাকি ? আরেহ ভয়ের কিছু নেই, আসো, কিছু ধাপে বিশ্লেষণ করা যাক -
+
+##### # আমরা pygame-এর কোন কোন features ব্যবহার করলাম তা দেখে আসা যাক  -
+- ##### # Initialization and Setup:
+    - * [pygame.init()](https://www.pygame.org/docs/ref/pygame.html#pygame.init) : এই function-টা call করার মাধ্যমে আমরা pygame এর imported modules-গুলিকে আগে থেকেই initialize করে রাখা হচ্ছে, যাতে আমরা modules-গুলি সময় মতো ব্যবহার করতে পারি।
+    ```
+    pygame.init()
+    ```
+    - * [pygame.quit()](https://www.pygame.org/docs/ref/pygame.html#pygame.quit) : এই function-টা init()-এর উল্টা, যেমন init(), imported modules-গুলিকে initialize করে তেমন quit() uninitialize করে।
+    ```
+    pygame.quit()
+    ```
+
+- ##### # Window and Display:
+    - * [pygame.display.set_mode(size=(w, h), ...)](https://www.pygame.org/docs/ref/display.html#pygame.display.set_mode) : আমাদের গেমের main window (যেটাতে close (X) বাটন থাকে) create হবে, এবং main window এর দৈর্ঘ্য(Width), প্রস্থ/উচ্চতা(Height) আমরা একটা tuple pass করার মাধ্যমে সেট করে দিতে পারি। 
+    ```
+    self.cellCount: int = 16
+    self.cellSize: int = 50
+    self.windowWH: Tuple[int, int] = (
+        self.cellCount * self.cellSize,
+        self.cellCount * self.cellSize
+    )
+    self.window: pygame.Surface = pygame.display.set_mode(self.windowWH)
+    ```
+    - * [pygame.display.set_caption(title: str, ...)](https://www.pygame.org/docs/ref/display.html#pygame.display.set_caption) : এই ফাংশন গেম উইন্ডোর শিরোনাম সেট করে। শিরোনামটি একটি স্ট্রিং যা উইন্ডোর শিরোনাম বারে প্রদর্শিত হবে।
+    ```
+    pygame.display.set_caption("PySnake")
+    ```
+    - * [pygame.display.flip()](https://www.pygame.org/docs/ref/display.html#pygame.display.flip) : এই ফাংশনটি সম্পূর্ণ গেম ডিসপ্লে আপডেট করে। পুরো স্ক্রীন রিফ্রেশ করতে এটি সাধারণত প্রতি ফ্রেমে একবার call হয়। পরিবর্তনগুলি দৃশ্যমান কিনা তা নিশ্চিত করতে এটি pygame.display.update() এর সাথে ব্যবহার করা উচিত।
+    ```
+    pygame.display.flip()
+    ```
+    - * [pygame.display.update()](https://www.pygame.org/docs/ref/display.html#pygame.display.update) : এই ফাংশনটি স্ক্রিনের(pygame main surface) কিছু অংশ আপডেট করে। এটি প্রায়শই স্ক্রিনের নির্দিষ্ট অঞ্চলগুলিকে আপডেট করে রেন্ডারিং অপ্টিমাইজ করতে ব্যবহৃত হয়। প্রদত্ত কোডে, এটি গেম ডিসপ্লে আপডেট করতে pygame.display.flip() এর পাশাপাশি কাজ করে।
+    ```
+    pygame.display.update()
+    ```
+
+- ##### # Rendering Objects and Images:
+    - * [pygame.image.load()](https://www.pygame.org/docs/ref/image.html#pygame.image.load) : এই ফাংশনটি Pygame ইমেজ মডিউলের একটি অংশ এবং একটি ফাইল থেকে ছবি লোড করার জন্য ব্যবহৃত হয়।
+    ```
+    self.image: pygame.Surface = pygame.image.load("resources/egg.png").convert_alpha()
+    ```
+    - * [pygame.transform.scale()](https://www.pygame.org/docs/ref/transform.html#pygame.transform.scale) : এই ফাংশনটি একটি surface/image-কে একটি নতুন আকারে, আকার পরিবর্তন করতে ব্যবহৃত হয়।
+    ```
+    self.image = pygame.transform.scale(self.image, scaledWH)
+    ```
+    - * [pygame.Rect(x, y, w, h, ...)](https://www.pygame.org/docs/ref/rect.html) : Rect-ক্লাসটি pygame main surface (window)-তে একটি আয়তক্ষেত্রাকার এলাকা প্রতিনিধিত্ব করে। গেমের ক্ষেত্র, সাপের মাথা এবং খাবারের মতো গেম object-গুলির মাত্রা এবং অবস্থান নির্ধারণের জন্য এটি ব্যাপকভাবে ব্যবহৃত হয়। Rect ক্লাস collision (সংঘর্ষ ) সনাক্তকরণ এবং আয়তক্ষেত্রাকার অঞ্চলগুলির manipulation- করার methods সরবরাহ করে।
+    ```
+    self.playArea = pygame.Rect(5, 40, self.width - 10, self.height - 45)
+    ```
+    - * [pygame.Surface.blit()](https://www.pygame.org/docs/ref/surface.html#pygame.Surface.blit) : 'blit'(Block Image Transfer) পদ্ধতিটি একটি surface-কে(font/image) অন্য surface-এ আঁকতে ব্যবহৃত হয়। এটি মূলত একটি নির্দিষ্ট অবস্থানে একটি surface থেকে অন্য surface-এ পিক্সেল কপি করে। কোডে, এটি গেম উইন্ডোতে বিভিন্ন গেমের উপাদান রেন্ডার করতে ব্যবহৃত হয়, যেমন খাবার, সাপ এবং মেনু উপাদান।
+    ```
+    self.window.blit(self.food.get_render_object(), self.foodPos)
+    ```
+    - * [pygame.draw.rect()](https://www.pygame.org/docs/ref/draw.html#pygame.draw.rect) : draw.rect ফাংশনটি একটি surface-এর উপর একটি আয়তক্ষেত্র আঁকতে ব্যবহৃত হয়।
+    ```
+    pygame.draw.rect(self.window, (6, 2, 26), self.playArea, 15)
+    ```
+    - * [pygame.draw.circle()](https://www.pygame.org/docs/ref/draw.html#pygame.draw.circle) : Surface-এর উপর একটি বৃত্ত আঁকতে draw.circle ফাংশন ব্যবহার করা হয়। কোডে, এটি একটি বৃত্তাকার মেনু background তৈরি করতে বৃত্ত আঁকতে ব্যবহৃত হয়।
+    ```
+    pygame.draw.circle(self.window, "Black", (self.width / 2, self.height / 2), self.width / 2.4)
+    pygame.draw.circle(self.window, (30, 60, 30), (self.width / 2, self.height / 2), self.width / 2.5)
+    ```
+    - * [pygame.Surface.fill()](https://www.pygame.org/docs/ref/surface.html#pygame.Surface.fill) : সম্পূর্ণ সারফেস একটি solid color দিয়ে পূরণ করতে 'fill' function ব্যবহার করা হয়।
+    ```
+    self.window.fill(self.backgroundColor)
+    ```
+
+- ##### # Sound Handling:
+    - * [pygame.mixer.Sound()](https://www.pygame.org/docs/ref/mixer.html) : Pygame-এ সাউন্ড ইফেক্ট পরিচালনার জন্য 'Sound' class ব্যবহার করা হয়। এটি সাউন্ড ফাইল লোড করে এবং শব্দ চালানো, থামাতে এবং ম্যানিপুলেট করার পদ্ধতি প্রদান করে। কোডে, এটি খাওয়া (eatSE), আঘাত (hitSE), এবং হিসিং (hissSE) এর জন্য বিভিন্ন সাউন্ড ইফেক্ট লোড করতে ব্যবহৃত করা হয়েছে।
+    ```
+    self.eatSE = pygame.mixer.Sound("resources/hiss3-103123.mp3")
+    self.hitSE = pygame.mixer.Sound("resources/loss.mp3")
+    self.hissSE = pygame.mixer.Sound("resources/hiss.mp3")
+    ```
+
+- ##### # Event Handling:
+    - * [pygame.event.get()](https://www.pygame.org/docs/ref/event.html#pygame.event.get) : event.get ফাংশন event queue(SDL event queue) থেকে সমস্ত event retrieve করে। কোডে, এটি user input-গুলি পরিচালনা করতে ব্যবহৃত হয়, যেমন key press এবং window close event।
+    ```
+    for event in pygame.event.get():
+        # ... (event handling logic)
+    ```
+    - * [pygame.event.custom_type()](https://www.pygame.org/docs/ref/event.html#pygame.event.custom_type) : এই ফাংশনটি pygame-এর একটি কাস্টম Event টাইপ তৈরি করে। প্রদত্ত কোডে, এটি স্বয়ংক্রিয় সাপের গতিবিধি (AUTO_SNAKE_MOVEMENT) এবং হিস শব্দ (AUTO_HISS_SOUND) বাজানোর জন্য কাস্টম Event-এর ধরন নির্ধারণ করতে ব্যবহৃত হয়। এই কাস্টম ইভেন্টগুলি গেমটিকে নিয়মিত বিরতিতে নির্দিষ্ট ক্রিয়াগুলি ট্রিগার করার অনুমতি দেয়।
+    ```
+    AUTO_SNAKE_MOVEMENT = pygame.event.custom_type()
+    AUTO_HISS_SOUND = pygame.event.custom_type()
+    ```
+
+- ##### # Fonts:
+    - * [pygame.font.Font()](https://www.pygame.org/docs/ref/font.html#pygame.font.Font) : Pygame-এ টেক্সট রেন্ডার করতে ফন্ট ক্লাস ব্যবহার করা হয়। এটি একটি ফন্ট ফাইলের পথ এবং ফন্টের আকারের সাথে শুরু করা হয়। এই ক্লাসটি আমাদেরকে টেক্সট অবজেক্ট তৈরি করতে দেয় যা গেম উইন্ডোতে প্রদর্শিত হতে পারে।
+    ```
+    self.font = pygame.font.Font("resources/Pixeltype.ttf", 50)
+    self.font.bold = True
+    ```
+
+- ##### # Vector
+    - * [pygame.math.Vector2()](https://www.pygame.org/docs/ref/math.html#pygame.math.Vector2) : Vector2 ব্যবহার করা হয় 2D ভেক্টরের প্রতিনিধিত্ব করতে এবং ম্যানিপুলেট করার জন্য, snake game-এর কোডে movement logic-কে সহজে ইমপ্লিমেন্ট করতে ব্যবহার করা হয়েছে ।
+    ```
+    class Direction:
+        RIGHT = pygame.math.Vector2(1, 0)
+        LEFT = pygame.math.Vector2(-1, 0)
+        UP = pygame.math.Vector2(0, -1)
+        DOWN = pygame.math.Vector2(0, 1)
+    ```
+
+- ##### # Timing and Clock:
+    - * [pygame.time.set_timer(event, time gap)](https://www.pygame.org/docs/ref/time.html#pygame.time.set_timer) : set_timer ফাংশনটি নির্দিষ্ট ব্যবধানে বারবার ইভেন্ট তৈরি করতে ব্যবহৃত হয়। কোডে, এটি নিয়মিত বিরতিতে কাস্টম ইভেন্ট AUTO_SNAKE_MOVEMENT এবং AUTO_HISS_SOUND ট্রিগার করতে ব্যবহৃত হয়, স্বয়ংক্রিয় সাপের চলাচল এবং পর্যায়ক্রমিক হিসিং শব্দ সক্ষম করে।
+    ```
+    pygame.time.set_timer(Game.AUTO_SNAKE_MOVEMENT, 200) # 200 millisecond
+    pygame.time.set_timer(Game.AUTO_HISS_SOUND, 5000) # 5000 millisecond
+    ```
+    - * [pygame.time.Clock()](https://www.pygame.org/docs/ref/time.html#pygame.time.Clock) : এই Clock হলো একটা python class যার instance ব্যবহার করে আমরা গেমের run-time এবং fps রিলেটেড কাজ করতে পারি।
+    ```
+    self.gameClock = pygame.time.Clock()
+    self.maxFPS = 60
+    ```
+
+#### আরেহ, এই দেখি আমরা আজকের মতো আমাদের আড্ডার সমাপ্তিতে এসে পড়েছি। তবে বিদায় নেয়ার আগে শেষ একটা কথা, আজকের আড্ডা থেকে আমরা যা জানলাম তা আমাদের গেমে ডেভেলপার অথবা pygame-এ বিশেষজ্ঞ বানাবে না।  তাহলে এখন কি করবো? এখন তোমরা pygame দিয়ে ছোট ছোট গেমে বানানোর চেষ্টা করবে এবং pygame নিয়ে আরো জানার জন্য pygame এর documentation উনুসরণ করবে।  
+
+##### Reference : [pygame doc](https://www.pygame.org/docs/)
