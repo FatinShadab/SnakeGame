@@ -60,143 +60,25 @@ Pygame শিখার জন্য এখন আমরা প্রস্তু
 ---
 শুরুতেই বলে নেই এখানে গেমটার কোড OOP Approach এ করা হবে। কেননা, এখন গেম ডেভেলপমেন্টে OOP Approach ব্যবহার করতে উৎসাহিত করা হয় এবং আমি নিজেও OOP Approach ব্যবহার করে থাকি।
 
-পুরো গেমটার কোড আমি কিছু ধাপে করে দেখাচ্ছি, যাতে তোমাদের অনুসরণ করতে সুবিধা হয় । 
-ধাপ গুলো হলো -
+এখন, কোড দেখার আগে আমরা দুইটা system সম্পর্কে একটু জেনে আসি। 
 
-- ১| Pygame দিয়ে সাধারণ একটা গেমলুপের blank template তৈরি করা
-- ২| সাপের খাবার ইমপ্লিমেন্টেশন
-- ৩| সাপ/প্লেয়ার ক্যারেক্টার ইমপ্লিমেন্টেশন
-- ৪| সাপের চলাচল এবং খাবারের অবস্থান ইমপ্লিমেন্টেশন
-- ৫| সাপ এবং খাবার এর গেম লজিক ইমপ্লিমেন্টেশন 
-- ৬| গেম স্কোর ইমপ্লিমেন্টেশন 
-- ৭| গেম টারমিনেশন লজিক ইমপ্লিমেন্টেশন
-- ৮| গেমে Sound সংযোজন
+##### Rectangle Collision System
+যেকোনো গেমে আমাদের collision system লাগবেই। আমাদের snake গেমের কথাই ধরা যাক, গেমে snake যে একটা food খেতে পারবে এবং গেমে score কখন বাড়াবো তা বুঝবো কিভাবে? এইতো বুঝেগেছো, যখন snake এবং food এর object এর সংঘর্ষ (collision) হবে।
 
-##### ১| Pygame দিয়ে সাধারণ একটা গেমলুপের blank template তৈরি করা
-```
-# কোড করার জন্য প্রয়োজনীয় লাইব্রেরি গুলো ইম্পোর্ট করা হয়েছে
-import sys       # Code সফলভাবে বন্ধ করার জন্য লাগবে
-import time      # delta time নির্ণয়র জন্য কাজে লাগবে 
-import pygame    # pygame রেফারেন্স api
+Rectangle collision system হলো সবচেয়ে সহজ collision system বলে আমার মনে হয়।
+এখানে করতে কি হয়? আমরা আমাদের প্রতিটি ছবি অথবা গেমে object কে একটা করে Rectangle দিয়ে রাখি, যেটা গেমে খেলার সময় দেখা যায় না। 
 
+এই Rectangle গুলি ছবিগুলোর সাথে move করে। তবে প্রশ্ন থেকেই যাই যে এমনটা কেন? 
 
-class Game:
-    def __init__(self):
-        # গেম ক্লাসের ইনিসিয়েলাইজেশন ফাংশন, যেখানে গেমের attributes সেট করা হচ্ছে
-        self.runFlag = True
-        self.maxFPS = 60
-        self.cellCount = 20
-        self.cellSize = 50
-        self.windowWH = (
-            self.cellCount * self.cellSize,
-            self.cellCount * self.cellSize
-        )
-        self.backgroundColor = (173, 204, 96)
-        self.width, self.height = self.windowWH
-        self.window = pygame.display.set_mode(self.windowWH)
-        pygame.display.set_caption("PySnake")
-        self.gameClock = pygame.time.Clock()
+কারণ দুইটা ছবির মধ্যে collision হয়েছে কিনা তা বের করা যত কঠিন, দুইটা Rectangle এর ভিতর তা বের করা তোতো সোজা। অংকের ভিতর আমি এখন যাবো না। কেননা, Pygame এটা আমাদের জন্য আগে থেকেই করে রেখেছে, আমরা শুধু তা ব্যবহার করবো, তবে তোমরা চাইলে দেখে নিতে পারো যে, দুটি Rectangle এর collision কিভাবে বের করা যায়।
 
-    def render(self):    
-        # গেমের রেন্ডারিং ফাংশন
-        self.window.fill(self.backgroundColor)
-
-    def input(self):
-        # ব্যবহারকারীর ইনপুট নেওয়ার ফাংশন
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.runFlag = False
-
-    def update(self, deltaTime):
-        # গেম আপডেট ফাংশন
-        pygame.display.update()
-
-    def cleanup(self):
-        # এই ফাংশনে সফলভাবে এবং সঠিকভাবে প্রোগ্রাম বন্ধ করার লজিক ইম্পলিমেন্ট করা হয়েছে
-        pygame.quit()
-        sys.exit()
-
-    def gameLoop(self):        
-        # গেম লুপের ফাংশন, যেখানে গেম লুপ চালানো হচ্ছে
-        lastTime = time.time()
-        
-        while self.runFlag:
-            deltaTime = time.time() - lastTime
-            lastTime = time.time()
-
-            self.input()
-            self.update(deltaTime)
-            self.render()
-
-            self.gameClock.tick(self.maxFPS)
-
-    def run(self):
-        self.gameLoop()
-
-if __name__ == "__main__":
-    # গেম ক্লাস ইনিশিয়ালাইজ করে এবং run ফাংশন চালায়
-    Game().run()
-```
-কোডটি run করলে নিচের ছবির মতো একটি window  খুলবে, window এর ধরণ OS ভেদে ভিন্ন হতে পারে।
 <br>
 <div style="text-align: center;">
-    <img src="images/ss1.png" height="60%" width="60%">
+    <img src="images/yAxis.png" height="60%" width="60%">
 </div>
 <br>
 
-##### ২| সাপের খাবার ইমপ্লিমেন্টেশন
-```
-# Food ক্লাস, এখানে ছবি লোড এবং স্কেল করা হচ্ছে
-class Food:
-    def __init__(self, scaledWH=None):
-        # ছবি লোড এবং কনভার্ট হচ্ছে
-        self.image = pygame.image.load("resources/egg.png").convert_alpha()
-        
-        # ছবি স্কেল করা হচ্ছে
-        if scaledWH:
-            self.image = pygame.transform.scale(
-                self.image, 
-                scaledWH
-            )
-        
-    def get_render_object(self):
-        # রেন্ডার অবজেক্ট প্রদান করা হচ্ছে
-        return self.image
-    
-    def get_random_render_pos(self, xRange, yRange):
-        # রেন্ডার অবজেক্ট এর রেন্ডম পোজিশন তৈরি করা হচ্ছে
-        x = random.randint(*xRange)
-        y = random.randint(*yRange)
-
-        return self.image.get_rect(topleft=(x, y))
-```
-```
-...
-class Game:
-    def __init__(self):
-        ...
-        ...
-        # টেস্ট করার জন্য একটা Food class এর Object তৈরি করা হলো 
-        food = Food((self.cellSize, self.cellSize))
-
-        # food object এর render object (ছবি) Pygame এর main Surface-এ সংযোজন করা হলো ।
-        self.window.blit(
-            food.get_render_object(),
-            food.get_random_render_pos(
-                (0,  (self.cellCount - 1) * self.cellSize),
-                (0,  (self.cellCount - 1) * self.cellSize)
-                )
-            )  
-    ...
-...
-```
-কোডটি রান করলে এখন একটা ডিমের ছবি window এর top-left corner এ দেখা যাচ্ছে । কিন্তু কেন? কারণ, কোডে random ভাবে (x, y) এর মান (0, 0) হয়েছে। 
-<br>
-<div style="text-align: center;">
-    <img src="images/ss2.png" height="60%" width="60%">
-</div>
-<br>
-
+##### Computer Graphics System
 বলাই বাহুল্য যে কম্পিউটার গ্রাফিক্সে (x, y) এর মান একটু ভিন্নভাবে কাজ করে। সাধারণত (0, 0) বিন্দুর অবস্থান মাঝখানে থাকার কথা।  তবে কম্পিউটার গ্রাফিক্সে (0, 0) বিন্দু top-left corner এ থাকে। ঠিক আছে বুঝলাম! আরে দাড়াও, এখনো শেষ হয় নি! মজার কথাতো বাকি আছে এখনও। কম্পিউটার গ্রাফিক্সে y এর মান উল্টাভাবে কাজ করে।
 
 উল্টাভাবে কাজ করে! মানে কি? এর মানে হলো যদি y এর মান বাড়ানো হয় তাহলে object নিচে নামে এবং y এর মান যদি কমানো হয় তাহলে object উপরে উঠে। মজার না ব্যাপারটা?
@@ -206,548 +88,400 @@ class Game:
 </div>
 <br>
 
-##### ৩| সাপ/প্লেয়ার ক্যারেক্টার ইমপ্লিমেন্টেশন
-```
-# Snake ক্লাসে Snake-এর একটি basic setup করা হচ্ছে
-
-class Snake:
-    # স্নেকের রঙ স্থাপন করা হচ্ছে (Class variable)
-    COLOR = (40, 55, 20)
-    
-    def __init__(self, cellWH):
-        # স্নেকের body-এর dimensions দেওয়া হচ্ছে
-        self.w, self.h = self.bodyWH = cellWH
-        
-        # স্নেকের body তৈরি করা হচ্ছে যা হলো list of vectors
-        self.body = [
-            pygame.math.Vector2(6, 9),
-            pygame.math.Vector2(5, 9),
-            pygame.math.Vector2(4, 9)
-        ]
-        
-        # স্নেকের মুখটি স্থাপন করা হচ্ছে
-        # Setting up the snake's head
-        self.head = self.body[0]
-
-    def get_render_object(self):
-        # রেন্ডার অবজেক্ট প্রদান করা হচ্ছে, যেখানে স্নেকের প্রতিটি খন্ডের স্থান এবং আয়তন প্রদান করা হচ্ছে
-        return [(block.x * self.w, block.y * self.h, *self.bodyWH) for block in self.body]
-```
-```
-...
-
-class Game:
-    def __init__(self):
-        self.cellCount = 20
-        self.cellSize = 50
-        self.windowWH = (
-            self.cellCount * self.cellSize,
-            self.cellCount * self.cellSize
-        )
-        ...
-        ...
-        
-        # Snake class এর একটি object তৈরি করা হলো। যেটা আমাদের গেমের playable charecter। 
-        self.snake = Snake((self.cellSize, self.cellSize))
-        
-        ...
-
-    def render(self):
-        # Snake object-টিকে রেন্ডার করা হচ্ছে 
-        for renderObj in self.snake.get_render_object():
-            pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 8)
-    ...
-    ...
-
-    def run(self):
-        self.gameLoop()
-
-...
-```
-চলো দেখি আমাদের সাপটা দেখতে কেমন। 
-<br>
-<div style="text-align: center;">
-    <img src="images/ss3.png" height="60%" width="60%">
-</div>
-<br>
-
-##### ৪| সাপের চলাচল এবং খাবারের অবস্থান ইমপ্লিমেন্টেশন
-```
-class Direction:
-    RIGHT = pygame.math.Vector2(1, 0)
-    LEFT = pygame.math.Vector2(-1, 0)
-    UP = pygame.math.Vector2(0, -1)
-    DOWN = pygame.math.Vector2(0, 1)
-```
-```
-class Snake:
-    COLOR = (40, 55, 20)
-    
-    def __init__(self, cellWH):
-        self.defaultDirection = Direction.RIGHT
-        self.w, self.h = self.bodyWH = cellWH
-        self.direction = self.defaultDirection
-        
-        ...
-        
-    def update(self):
-        self.body.pop()
-        self.body.insert(0, self.head + self.direction)
-        self.head = self.body[0]
-    ...
-```
-```
-class Game:
-    AUTO_SNAKE_MOVEMENT = pygame.event.custom_type()
-    AUTO_FOOD_GENERATION = pygame.event.custom_type()
-    
-    def __init__(self):
-        pygame.init()
-        self.cellCount = 20
-        self.cellSize = 50
-        self.windowWH = (
-            self.cellCount * self.cellSize,
-            self.cellCount * self.cellSize
-        )
-        self.width, self.height = self.windowWH
-        self.runFlag = True
-        self.window = pygame.display.set_mode(self.windowWH)
-        self.gameClock = pygame.time.Clock()
-        self.maxFPS = 60
-        self.backgroundColor = (173, 204, 96)
-        pygame.display.set_caption("PySnake")
-        
-        self.snake = Snake((self.cellSize, self.cellSize))
-        
-        self.food = Food((self.cellSize + 10, self.cellSize + 10))
-        self.foodPos = self.foodPos = self.food.get_random_render_pos(
-            (50,  (self.cellCount - 2) * self.cellSize),
-            (50,  (self.cellCount - 2) * self.cellSize)
-        )
-        
-        self.recordedUserEvent = None
-        
-        pygame.time.set_timer(Game.AUTO_SNAKE_MOVEMENT, 200)
-        pygame.time.set_timer(Game.AUTO_FOOD_GENERATION, 4000)
-
-    def render(self):
-        self.window.fill(self.backgroundColor)
-        
-        self.window.blit(
-            self.food.get_render_object(),
-            self.foodPos
-        )
-        
-        for idx, renderObj in enumerate(self.snake.get_render_object()):
-            if idx == 0:
-                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 16)
-            else:
-                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 8)
-
-    def input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.runFlag = False
-                
-            self.recordedUserEvent = event
-
-    def update(self):
-        if self.recordedUserEvent:
-            if self.recordedUserEvent.type == Game.AUTO_SNAKE_MOVEMENT:
-                self.snake.update()
-            
-            if self.recordedUserEvent.type == Game.AUTO_FOOD_GENERATION:
-                print(pygame.time.get_ticks())
-                self.foodPos = self.food.get_random_render_pos(
-                    (50,  (self.cellCount - 2) * self.cellSize),
-                    (50,  (self.cellCount - 2) * self.cellSize)
-                )
-                
-            if self.recordedUserEvent.type == pygame.KEYDOWN:
-                if self.recordedUserEvent.key == pygame.K_UP:
-                    self.snake.direction = Direction.UP
-                elif self.recordedUserEvent.key == pygame.K_DOWN:
-                    self.snake.direction = Direction.DOWN
-                elif self.recordedUserEvent.key == pygame.K_RIGHT:
-                    self.snake.direction = Direction.RIGHT
-                elif self.recordedUserEvent.key == pygame.K_LEFT:
-                    self.snake.direction = Direction.LEFT
-            
-            self.recordedUserEvent = None
-
-        pygame.display.flip()
-        pygame.display.update()
-
-    def cleanup(self):
-        pygame.quit()
-        sys.exit()
-
-    def gameLoop(self):
-        while self.runFlag:
-            
-            self.input()
-            self.update()
-            self.render()
-
-            self.gameClock.tick(self.maxFPS)
-
-    def run(self):
-        self.gameLoop()
-```
-##### ৫| সাপ এবং খাবার এর গেম লজিক ইমপ্লিমেন্টেশন 
+##### Self Explanatory Source Code
 ```
 import sys
 import random
+from typing import Optional, List, Tuple
 import pygame
 
 
 class Direction:
-    RIGHT = pygame.math.Vector2(1, 0)
-    LEFT = pygame.math.Vector2(-1, 0)
-    UP = pygame.math.Vector2(0, -1)
-    DOWN = pygame.math.Vector2(0, 1)
+    """
+    Used for representing different directions.
+    """
+    RIGHT: pygame.math.Vector2 = pygame.math.Vector2(1, 0)
+    LEFT: pygame.math.Vector2 = pygame.math.Vector2(-1, 0)
+    UP: pygame.math.Vector2 = pygame.math.Vector2(0, -1)
+    DOWN: pygame.math.Vector2 = pygame.math.Vector2(0, 1)
 
 
 class Food:
-    def __init__(self, scaledWH = None):
-        self.image = pygame.image.load("resources/egg.png").convert_alpha()
-        
+    """
+    Represents the food object in the game.
+    """
+    def __init__(self, scaledWH: Optional[Tuple[int, int]] = None) -> None:
+        """
+        Initialize the Food object.
+
+        Parameters:
+            scaledWH (tuple): Tuple specifying the scaled width and height of the food image.
+        """
+        self.image: pygame.Surface = pygame.image.load("resources/egg.png").convert_alpha()
+
         if scaledWH:
             self.image = pygame.transform.scale(
-                self.image, 
+                self.image,
                 scaledWH
             )
-        
-    def get_render_object(self):
+
+    def get_render_object(self) -> pygame.Surface:
+        """
+        Get the render object (image) of the food.
+
+        Returns:
+            pygame.Surface: The rendered image of the food.
+        """
         return self.image
-    
-    def get_random_render_pos(self, xRange, yRange):
-        x = random.randint(*xRange)
-        y = random.randint(*yRange)
-        
+
+    def get_random_render_pos(self, xRange: Tuple[int, int], yRange: Tuple[int, int]) -> pygame.Rect:
+        """
+        Get a random position for rendering the food.
+
+        Parameters:
+            xRange (tuple): Tuple specifying the range of x-coordinate for the random position.
+            yRange (tuple): Tuple specifying the range of y-coordinate for the random position.
+
+        Returns:
+            pygame.Rect: Rectangle representing the random position for rendering the food.
+        """
+        x: int = random.randint(*xRange)
+        y: int = random.randint(*yRange)
+
         return self.image.get_rect(topleft=(x, y))
 
 
 class Snake:
-    COLOR = (40, 55, 20)
-    
-    def __init__(self, cellWH):
-        self.defaultDirection = Direction.RIGHT
+    """
+    Represents the snake object in the game.
+    """
+    COLOR: Tuple[int, int, int] = (40, 55, 20)
+
+    def __init__(self, cellWH: Tuple[int, int]) -> None:
+        """
+        Initialize the Snake object.
+
+        Parameters:
+            cellWH (tuple): Tuple specifying the width and height of each cell in the snake.
+        """
+        self.defaultDirection: pygame.math.Vector2 = Direction.RIGHT
         self.w, self.h = self.bodyWH = cellWH
+        self.direction: pygame.math.Vector2 = self.defaultDirection
+
+        # Initial body parts of the snake
+        self.body: List[pygame.math.Vector2] = [
+            pygame.math.Vector2(6, 9),
+            pygame.math.Vector2(5, 9),
+            pygame.math.Vector2(4, 9)
+        ]
+
+        self.head: pygame.math.Vector2 = self.body[0]
+
+    def update(self) -> None:
+        """
+        Update the position of the snake based on its direction.
+        """
+        self.body.pop()
+        self.body.insert(0, self.head + self.direction)
+        self.head = self.body[0]
+
+    def get_render_object(self) -> List[Tuple[int, int, int, int]]:
+        """
+        Get the render objects (rectangles) for each body part of the snake.
+
+        Returns:
+            list: List of tuples, where each tuple represents the (x, y, width, height) of a body part.
+        """
+        return [(block.x * self.w, block.y * self.h, *self.bodyWH) for block in self.body]
+
+    def get_snake_head(self) -> pygame.Rect:
+        """
+        Get the rectangle representing the head of the snake.
+
+        Returns:
+            pygame.Rect: Rectangle representing the head of the snake.
+        """
+        return pygame.Rect(self.head.x * self.w, self.head.y * self.h, *self.bodyWH)
+
+    def grow(self) -> None:
+        """
+        Increase the length of the snake by adding a body part.
+        """
+        self.body.append(self.body[-1] + self.direction)
+
+    def reset(self) -> None:
+        """
+        Reset the snake to its default state.
+        """
         self.direction = self.defaultDirection
-        
+
+        # Initial body parts of the snake
         self.body = [
             pygame.math.Vector2(6, 9),
             pygame.math.Vector2(5, 9),
             pygame.math.Vector2(4, 9)
         ]
-        
-        self.head = self.body[0]
-        
-    def update(self):
-        self.body.pop()
-        self.body.insert(0, self.head + self.direction)
-        self.head = self.body[0]
-        
-    def get_render_object(self):
-        return [(block.x * self.w, block.y * self.h, *self.bodyWH) for block in self.body]
-    
-    def get_snake_head(self):
-        return pygame.Rect(self.head.x * self.w, self.head.y * self.h, *self.bodyWH)
 
-    def grow(self):
-        self.body.append(self.body[-1] + self.direction)
+        self.head = self.body[0]
+
 
 class Game:
-    AUTO_SNAKE_MOVEMENT = pygame.event.custom_type()
-    AUTO_FOOD_GENERATION = pygame.event.custom_type()
-    
-    def __init__(self):
+    """
+    Represents the main game class.
+    """
+    Menu: int = 0
+    Play: int = 2
+    Pause: int = 3
+
+    AUTO_SNAKE_MOVEMENT: int = pygame.event.custom_type()
+    AUTO_HISS_SOUND: int = pygame.event.custom_type()
+
+    def __init__(self) -> None:
+        """
+        Initialize the Game object.
+        """
         pygame.init()
-        self.cellCount = 20
-        self.cellSize = 50
-        self.windowWH = (
+
+        # Game state and properties
+        self.state: int = Game.Menu
+        self.scoreValue: int = 0
+        self.highScoreValue: int = 0
+        self.cellCount: int = 16
+        self.cellSize: int = 50
+        self.windowWH: Tuple[int, int] = (
             self.cellCount * self.cellSize,
             self.cellCount * self.cellSize
         )
         self.width, self.height = self.windowWH
-        self.runFlag = True
-        self.window = pygame.display.set_mode(self.windowWH)
-        self.gameClock = pygame.time.Clock()
-        self.maxFPS = 60
-        self.backgroundColor = (173, 204, 96)
+        self.runFlag: bool = True
+        self.window: pygame.Surface = pygame.display.set_mode(self.windowWH)
+        self.gameClock: pygame.time.Clock = pygame.time.Clock()
+        self.font: pygame.font.Font = pygame.font.Font("resources/Pixeltype.ttf", 50)
+        self.font.bold: bool = True
+        self.maxFPS: int = 60
+        self.backgroundColor: Tuple[int, int, int] = (173, 204, 96)
         pygame.display.set_caption("PySnake")
-        
-        self.snake = Snake((self.cellSize, self.cellSize))
-        
-        self.food = Food((self.cellSize + 10, self.cellSize + 10))
-        self.foodPos = self.foodPos = self.food.get_random_render_pos(
-            (50,  (self.cellCount - 2) * self.cellSize),
-            (50,  (self.cellCount - 2) * self.cellSize)
-        )
-        
-        self.recordedUserEvent = None
-        
+
+        # Snake and Food objects
+        self.snake: Snake = Snake((self.cellSize + 10, self.cellSize + 10))
+        self.food: Food = Food((2 * self.cellSize, 2 * self.cellSize))
+        self.foodPos: Optional[pygame.Rect] = None
+
+        # Play area rectangle
+        self.playArea: pygame.Rect = pygame.Rect(5, 40, self.width - 10, self.height - 45)
+
+        # Timer events for automatic snake movement and hiss sound
         pygame.time.set_timer(Game.AUTO_SNAKE_MOVEMENT, 200)
-        pygame.time.set_timer(Game.AUTO_FOOD_GENERATION, 4000)
+        pygame.time.set_timer(Game.AUTO_HISS_SOUND, 5000)
 
-    def handle_food_snake_collision(self):
-        if self.snake.get_snake_head().colliderect(self.foodPos):
-            self.foodPos = self.foodPos = self.food.get_random_render_pos(
-                (50,  (self.cellCount - 2) * self.cellSize),
-                (50,  (self.cellCount - 2) * self.cellSize)
+        # Configure audio
+        self.config_audio()
+
+    def config_audio(self) -> None:
+        """
+        Load and configure game sounds.
+        """
+        self.eatSE: pygame.mixer.Sound = pygame.mixer.Sound("resources/hiss3-103123.mp3")
+        self.hitSE: pygame.mixer.Sound = pygame.mixer.Sound("resources/loss.mp3")
+        self.hissSE: pygame.mixer.Sound = pygame.mixer.Sound("resources/hiss.mp3")
+
+        # Set volume for each sound
+        self.eatSE.set_volume(0.5)
+        self.hitSE.set_volume(0.5)
+        self.hissSE.set_volume(0.5)
+
+    def update_high_sore(self) -> None:
+        """
+        Update the high score based on the current score.
+        """
+        self.highScoreValue: int = max(self.highScoreValue, self.scoreValue)
+
+    def handle_food_snake_collision(self) -> None:
+        """
+        Handle collisions between snake and food, update score, and play sound.
+        """
+        food_solid_area: pygame.Rect = self.foodPos.copy()
+        food_solid_area.width = 40
+        food_solid_area.height = 40
+        food_solid_area.x += 35
+        food_solid_area.y += 25
+
+        if self.snake.get_snake_head().colliderect(food_solid_area):
+            # Generate new food position
+            self.foodPos: Optional[pygame.Rect] = self.food.get_random_render_pos(
+                (50, (self.cellCount - 2) * self.cellSize),
+                (50, (self.cellCount - 2) * self.cellSize)
             )
-            self.snake.grow()
-        
-        pass
-
-    def render(self):
-        self.window.fill(self.backgroundColor)
-        
-        self.window.blit(
-            self.food.get_render_object(),
-            self.foodPos
-        )
-        
-        for idx, renderObj in enumerate(self.snake.get_render_object()):
-            if idx == 0:
-                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 20)
-            else:
-                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 16)
-
-    def input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.runFlag = False
-                
-            self.recordedUserEvent = event
-
-    def update(self):
-        if self.recordedUserEvent:
-            if self.recordedUserEvent.type == Game.AUTO_SNAKE_MOVEMENT:
-                self.snake.update()
-            
-            if self.recordedUserEvent.type == Game.AUTO_FOOD_GENERATION:
-                self.foodPos = self.food.get_random_render_pos(
-                    (50,  (self.cellCount - 2) * self.cellSize),
-                    (50,  (self.cellCount - 2) * self.cellSize)
-                )
-                
-            if self.recordedUserEvent.type == pygame.KEYDOWN:
-                if self.recordedUserEvent.key == pygame.K_UP:
-                    self.snake.direction = Direction.UP
-                if self.recordedUserEvent.key == pygame.K_DOWN:
-                    self.snake.direction = Direction.DOWN
-                if self.recordedUserEvent.key == pygame.K_RIGHT:
-                    self.snake.direction = Direction.RIGHT
-                if self.recordedUserEvent.key == pygame.K_LEFT:
-                    self.snake.direction = Direction.LEFT
-            
-            self.recordedUserEvent = None
-            
-        self.handle_food_snake_collision()
-
-        pygame.display.flip()
-        pygame.display.update()
-
-    def cleanup(self):
-        pygame.quit()
-        sys.exit()
-
-    def gameLoop(self):
-        while self.runFlag:
-            
-            self.input()
-            self.update()
-            self.render()
-
-            self.gameClock.tick(self.maxFPS)
-
-    def run(self):
-        self.gameLoop()
-
-
-if __name__ == "__main__":
-    Game().run()
-```
-##### ৬| গেম স্কোর ইমপ্লিমেন্টেশন 
-```
-import sys
-import random
-import pygame
-
-
-class Direction:
-    RIGHT = pygame.math.Vector2(1, 0)
-    LEFT = pygame.math.Vector2(-1, 0)
-    UP = pygame.math.Vector2(0, -1)
-    DOWN = pygame.math.Vector2(0, 1)
-
-
-class Food:
-    def __init__(self, scaledWH = None):
-        self.image = pygame.image.load("resources/egg.png").convert_alpha()
-        
-        if scaledWH:
-            self.image = pygame.transform.scale(
-                self.image, 
-                scaledWH
-            )
-        
-    def get_render_object(self):
-        return self.image
-    
-    def get_random_render_pos(self, xRange, yRange):
-        x = random.randint(*xRange)
-        y = random.randint(*yRange)
-        
-        return self.image.get_rect(topleft=(x, y))
-
-
-class Snake:
-    COLOR = (40, 55, 20)
-    
-    def __init__(self, cellWH):
-        self.defaultDirection = Direction.RIGHT
-        self.w, self.h = self.bodyWH = cellWH
-        self.direction = self.defaultDirection
-        
-        self.body = [
-            pygame.math.Vector2(6, 9),
-            pygame.math.Vector2(5, 9),
-            pygame.math.Vector2(4, 9)
-        ]
-        
-        self.head = self.body[0]
-        
-    def update(self):
-        self.body.pop()
-        self.body.insert(0, self.head + self.direction)
-        self.head = self.body[0]
-        
-    def get_render_object(self):
-        return [(block.x * self.w, block.y * self.h, *self.bodyWH) for block in self.body]
-    
-    def get_snake_head(self):
-        return pygame.Rect(self.head.x * self.w, self.head.y * self.h, *self.bodyWH)
-
-    def grow(self):
-        self.body.append(self.body[-1] + self.direction)
-
-class Game:
-    AUTO_SNAKE_MOVEMENT = pygame.event.custom_type()
-    AUTO_FOOD_GENERATION = pygame.event.custom_type()
-    
-    def __init__(self):
-        pygame.init()
-        self.scoreValue = 0
-        self.cellCount = 16
-        self.cellSize = 50
-        self.windowWH = (
-            self.cellCount * self.cellSize,
-            self.cellCount * self.cellSize
-        )
-        self.width, self.height = self.windowWH
-        self.runFlag = True
-        self.window = pygame.display.set_mode(self.windowWH)
-        self.gameClock = pygame.time.Clock()
-        self.font = pygame.font.Font("resources/Pixeltype.ttf", 60)
-        self.maxFPS = 60
-        self.backgroundColor = (173, 204, 96)
-        pygame.display.set_caption("PySnake")
-        
-        self.snake = Snake((self.cellSize + 10, self.cellSize + 10))
-        
-        self.food = Food((2*self.cellSize, 2*self.cellSize))
-        self.foodPos = self.foodPos = self.food.get_random_render_pos(
-            (50,  (self.cellCount - 2) * self.cellSize),
-            (50,  (self.cellCount - 2) * self.cellSize)
-        )
-        
-        self.recordedUserEvent = None
-        
-        pygame.time.set_timer(Game.AUTO_SNAKE_MOVEMENT, 200)
-        pygame.time.set_timer(Game.AUTO_FOOD_GENERATION, 5000)
-
-    def handle_food_snake_collision(self):
-        if self.snake.get_snake_head().colliderect(self.foodPos):
-            self.foodPos = self.foodPos = self.food.get_random_render_pos(
-                (50,  (self.cellCount - 2) * self.cellSize),
-                (50,  (self.cellCount - 2) * self.cellSize)
-            )
+            # Grow the snake, update score, and play eat sound
             self.snake.grow()
             self.scoreValue += 1
+            self.eatSE.play()
 
-    def render(self):
+    def termination_event_ocurred(self) -> bool:
+        """
+        Check for game termination conditions.
+
+        Returns:
+            bool: True if the termination conditions are met, False otherwise.
+        """
+        snakeHead: pygame.Rect = self.snake.get_snake_head()
+        for bodyPart in self.snake.get_render_object()[1:]:
+            if snakeHead.contains(bodyPart):
+                return True
+        return not self.playArea.contains(snakeHead)
+
+    def render_menu(self) -> None:
+        """
+        Render the menu screen.
+        """
+        pygame.draw.circle(self.window, "Black", (self.width // 2, self.height // 2), self.width // 2.4)
+        pygame.draw.circle(self.window, (30, 60, 30), (self.width // 2, self.height // 2), self.width // 2.5)
+
+        if self.termination_event_ocurred():
+            # If game over, display score and high score
+            self.window.blit(self.font.render(f"Score : {self.scoreValue}", False, (6, 2, 26)),
+                             ((self.width // 4) + 120, self.height // 2.6))
+            self.window.blit(self.font.render(f"High Score : {self.highScoreValue}", False, (6, 2, 26)),
+                             ((self.width // 4) + 100, self.height // 2.2))
+            self.window.blit(self.font.render(f"Press Enter To Play !", False, (6, 2, 26)),
+                             ((self.width // 4) + 50, self.height // 1.8))
+        else:
+            # If not game over, display instructions
+            self.window.blit(self.font.render(f"Use Arrow keys to Move !", False, (6, 2, 26)),
+                             ((self.width // 5) + 70, self.height // 2.6))
+            self.window.blit(self.font.render(f"Space key to Pause !", False, (6, 2, 26)),
+                             ((self.width // 4) + 60, self.height // 2.2))
+            self.window.blit(self.font.render(f"Press Enter To Play !", False, (6, 2, 26)),
+                             ((self.width // 4) + 55, self.height // 1.8))
+
+    def render(self) -> None:
+        """
+        Render the game.
+        """
         self.window.fill(self.backgroundColor)
-        
-        self.window.blit(self.font.render(f"Score {self.scoreValue}", False, "White"), (5, 5))
-        
-        self.window.blit(
-            self.food.get_render_object(),
-            self.foodPos
-        )
-        
+
+        # Draw play area rectangle
+        pygame.draw.rect(self.window, (6, 2, 26), self.playArea, 15)
+
+        # Display scores
+        self.window.blit(self.font.render(f"Score {self.scoreValue}", False, (6, 2, 26)), (10, 5))
+        self.window.blit(self.font.render(f"High Score : {self.highScoreValue}", False, (6, 2, 26)),
+                         ((self.width - 400) + 100, 5))
+
+        if self.foodPos:
+            # Display food at its position
+            self.window.blit(
+                self.food.get_render_object(),
+                self.foodPos
+            )
+
         for idx, renderObj in enumerate(self.snake.get_render_object()):
             if idx == 0:
-                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 20)
+                # Draw head of the snake with larger border
+                pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 26)
             else:
+                # Draw body parts of the snake with smaller border
                 pygame.draw.rect(self.window, Snake.COLOR, renderObj, 0, 16)
 
-    def input(self):
+        if self.state == Game.Menu:
+            # Render menu screen if the game is in menu state
+            self.render_menu()
+
+        if self.state == Game.Pause:
+            # Draw pause indicator if the game is in pause state
+            pygame.draw.rect(self.window, Snake.COLOR, pygame.Rect(200, 5, 10, 20))
+            pygame.draw.rect(self.window, Snake.COLOR, pygame.Rect(215, 5, 10, 20))
+
+    def input(self) -> None:
+        """
+        Handle user input.
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.runFlag = False
-                
-            self.recordedUserEvent = event
 
-    def update(self):
-        if self.recordedUserEvent:
-            if self.recordedUserEvent.type == Game.AUTO_SNAKE_MOVEMENT:
-                self.snake.update()
-            
-            if self.recordedUserEvent.type == Game.AUTO_FOOD_GENERATION:
-                self.foodPos = self.food.get_random_render_pos(
-                    (50,  (self.cellCount - 2) * self.cellSize),
-                    (50,  (self.cellCount - 2) * self.cellSize)
-                )
-                
-            if self.recordedUserEvent.type == pygame.KEYDOWN:
-                if self.recordedUserEvent.key == pygame.K_UP:
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN and self.state == Game.Menu:
+                    # Start the game when Enter is pressed in the menu state
+                    self.scoreValue = 0
+                    self.snake.reset()
+                    self.foodPos: Optional[pygame.Rect] = self.food.get_random_render_pos(
+                        (50, (self.cellCount - 2) * self.cellSize),
+                        (50, (self.cellCount - 2) * self.cellSize)
+                    )
+                    self.state = Game.Play
+
+                if event.key == pygame.K_SPACE:
+                    # Toggle pause state with Space key
+                    if self.state == Game.Play:
+                        self.state = Game.Pause
+                    elif self.state == Game.Pause:
+                        self.state = Game.Play
+                elif event.key == pygame.K_UP:
+                    # Change snake direction based on arrow keys
                     self.snake.direction = Direction.UP
-                if self.recordedUserEvent.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN:
                     self.snake.direction = Direction.DOWN
-                if self.recordedUserEvent.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT:
                     self.snake.direction = Direction.RIGHT
-                if self.recordedUserEvent.key == pygame.K_LEFT:
+                elif event.key == pygame.K_LEFT:
                     self.snake.direction = Direction.LEFT
-            
-            self.recordedUserEvent = None
-            
+
+            elif event.type == Game.AUTO_SNAKE_MOVEMENT:
+                # Automatically update snake position at regular intervals
+                if self.state == Game.Play:
+                    self.snake.update()
+
+            elif event.type == Game.AUTO_HISS_SOUND:
+                # Play hiss sound at regular intervals
+                if self.state == Game.Play:
+                    self.hissSE.play()
+
+    def update(self) -> None:
+        """
+        Update the game state.
+        """
+        self.update_high_sore()
         self.handle_food_snake_collision()
 
-        pygame.display.flip()
-        pygame.display.update()
+        if self.termination_event_ocurred():
+            # Play hit sound and reset to menu state if termination conditions are met
+            self.hitSE.play()
+            self.state = Game.Menu
 
-    def cleanup(self):
+    def cleanup(self) -> None:
+        """
+        Clean up resources and exit the game.
+        """
         pygame.quit()
         sys.exit()
 
-    def gameLoop(self):
+    def gameLoop(self) -> None:
+        """
+        Main game loop.
+        """
         while self.runFlag:
-            
             self.input()
-            self.update()
+
+            if self.state == Game.Play:
+                self.update()
+
             self.render()
 
             self.gameClock.tick(self.maxFPS)
+            pygame.display.flip()
+            pygame.display.update()
 
-    def run(self):
+    def run(self) -> None:
+        """
+        Start the game.
+        """
         self.gameLoop()
 
 
 if __name__ == "__main__":
+    # Run the game when the script is executed
     Game().run()
+
 ```
-##### ৭| গেম টারমিনেশন লজিক ইমপ্লিমেন্টেশন
-##### ৮| গেমে Sound সংযোজন 
+ভয় পেলে নাকি ? আরেহ ভয়ের কিছু নেই, আসো, কিছু ধাপে বিশ্লেষণ করা যাক -
